@@ -2,6 +2,7 @@ import numpy as np
 import tensorflow as tf
 #import matplotlib.pyplot as plt
 
+
 # get data from train_1.csv
 tmp = np.genfromtxt("train_1.csv", dtype=float, delimiter=",")
 
@@ -13,9 +14,12 @@ tem = np.true_divide(tem,ptp)
 tmp[1:,2:] = tem
 
 train_data = tmp[1:601,2:]
-validation_data = tmp[601:,2:]
-train_lable = tmp[1:,1]
-train_lable = train_lable.reshape(891,1)
+validation_data0 = tmp[601:,2:]
+
+train_lable = tmp[1:601,1]
+validation_lable0 = tmp[601:,1]
+train_lable = train_lable.reshape(600,1)
+validation_lable0 = validation_lable0.reshape(291,1)
 
 def add_layer(input,in_size,out_size):
     theta = tf.Variable(tf.random_normal([in_size,out_size]))
@@ -39,11 +43,30 @@ theta_1,l1,z_1 = add_layer(xs,6,12)
 # add output layer
 theta_2,output,z_2 = add_layer(l1,13,1)
 
-# the error between prediction and real data
-J_theta = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels = ys,logits = z_2))
+#regularzation
+lamda = 0.05
+regularzation = (tf.reduce_sum(tf.square(theta_1))+tf.reduce_sum(tf.square(theta_2)))*lamda/600
 
-a = 0.1 # learning rate
+# the error between prediction and real data
+J_theta = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels = ys,logits = z_2)) + regularzation
+
+a = 0.2 # learning rate
 train_step = tf.train.GradientDescentOptimizer(a).minimize(J_theta)
+
+#prediction
+validation_data = tf.constant(validation_data0,tf.float32)
+validation_lable = tf.constant(validation_lable0,tf.float32)
+
+a_1 = tf.sigmoid(tf.matmul(validation_data,theta_1))
+a_0 = tf.ones([291,1])
+a_20 = tf.concat([a_0,a_1],1)
+a_2 = tf.sigmoid(tf.matmul(a_20,theta_2))
+prediction = tf.round(a_2)
+
+validation = tf.subtract(prediction,validation_lable)
+validation = tf.abs(validation)
+accuracy =tf.reduce_sum(validation) 
+accuracy = (291-accuracy)/291
 
 #initialize
 init = tf.global_variables_initializer()
@@ -51,15 +74,19 @@ init = tf.global_variables_initializer()
 sess = tf.Session()
 sess.run(init)
 
-for i in range(100000):
+for i in range(70000):
     #training
-    sess.run(train_step,feed_dict={xs:train_data[0:600],ys:train_lable[0:600]})
+    sess.run(train_step,feed_dict={xs:train_data,ys:train_lable})
     
     if i%1000 == 0:
-        loss = sess.run(J_theta,feed_dict={xs:train_data[0:600],ys:train_lable[0:600]})
+        loss = sess.run(J_theta,feed_dict={xs:train_data,ys:train_lable})
         print("J_theta:",loss)
-        theta1 = sess.run(theta_1)
-        theta2 = sess.run(theta_2)
-        #print(theta1,theta2,train_data[601:890])
+        acc = sess.run(accuracy)
+        print(acc)
+        
+
+
+
+
 
 
