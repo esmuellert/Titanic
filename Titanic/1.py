@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
-# get data from train_1.csv
+## get data from train_1.csv
 tmp = np.genfromtxt("train_1.csv", dtype=np.str, delimiter=",")
 train_data = tmp[1:,2:]
 train_lable = tmp[1:,1]
