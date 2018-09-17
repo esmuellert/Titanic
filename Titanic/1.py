@@ -31,7 +31,7 @@ theta_1,l1,z_1 = add_layer(xs,6,12)
 theta_2,output,z_2 = add_layer(l1,13,1)
 
 # the error between prediction and real data
-J_theta = tf.nn.sigmoid_cross_entropy_with_logits(labels = ys,logits = z_2)
+J_theta = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels = ys,logits = z_2))
 
 a = 0.1 # learning rate
 train_step = tf.train.GradientDescentOptimizer(a).minimize(J_theta)
@@ -42,10 +42,11 @@ init = tf.global_variables_initializer()
 sess = tf.Session()
 sess.run(init)
 
-for i in range(1000):
+for i in range(10000):
     #training
     sess.run(train_step,feed_dict={xs:train_data,ys:train_lable})
     
-    if i % 50 == 0:
-        print(sess.run(J_theta,feed_dict={xs:train_data,ys:train_lable}))
+    if i%100 == 0:
+        loss = sess.run(J_theta,feed_dict={xs:train_data,ys:train_lable})
+        print(loss)
 
