@@ -44,13 +44,13 @@ theta_1,l1,z_1 = add_layer(xs,6,12)
 theta_2,output,z_2 = add_layer(l1,13,1)
 
 #regularzation
-lamda = 0.05
+lamda = 0.06
 regularzation = (tf.reduce_sum(tf.square(theta_1))+tf.reduce_sum(tf.square(theta_2)))*lamda/600
 
 # the error between prediction and real data
 J_theta = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels = ys,logits = z_2)) + regularzation
 
-a = 0.2 # learning rate
+a = 0.8 # learning rate
 train_step = tf.train.GradientDescentOptimizer(a).minimize(J_theta)
 
 #prediction
@@ -74,7 +74,7 @@ init = tf.global_variables_initializer()
 sess = tf.Session()
 sess.run(init)
 
-for i in range(70000):
+for i in range(200000):
     #training
     sess.run(train_step,feed_dict={xs:train_data,ys:train_lable})
     
